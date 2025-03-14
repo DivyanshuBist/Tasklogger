@@ -1,0 +1,4 @@
+tasklogger.db
+python_env/
+tasklogger.egg-info/
+__pycache__/
