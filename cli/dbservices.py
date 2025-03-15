@@ -77,8 +77,10 @@ def DB_checkout_task(title:str,prevcheckedintask:str)->dict:
         print(e)
         outmap["Error"]=e
         conn.rollback()
+    finally:
+        return outmap
 
-def DB_insert_logs(taskid):
+def DB_insert_logs(taskid)->dict:
     insertlogquery="""
         INSERT into logs(tasks_id,started_at,ended_at) values (?,?,?)
     """
@@ -91,10 +93,11 @@ def DB_insert_logs(taskid):
             cursor.execute(insertlogquery,(taskid,datetime.datetime.now(),None))
             cursor.execute(updatetaskfieldquery,(taskid,))
             conn.commit()
+            return "ok"
     except Exception as e:
-        print(e)    
+        return e    
 
-def DB_update_logs(logid,taskid):
+def DB_update_logs(logid,taskid)->str:
     updatelogquery="""
         UPDATE logs SET ended_at=(?) 
         WHERE id=(?)
@@ -109,6 +112,7 @@ def DB_update_logs(logid,taskid):
             cursor.execute(updatelogquery,(datetime.datetime.now(),logid))
             cursor.execute(updatetaskquery,(taskid,))
             conn.commit()
+            return "ok"
     except Exception as e:
-        print(e)    
-        traceback.print_exc()
+        return e    
+        

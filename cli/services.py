@@ -6,8 +6,6 @@ class cliservices:
     def __init__(self):
         self.current_task:list= [Task(id=row[0], name=row[1], checkedin=row[2],running=row[3],createddate=row[4]) for row in initstatus()["tasks"]]
         self.current_logs=[Log(id=row[0],tasks_id=row[1],started_at=row[2],ended_at=row[3]) for row in initstatus()["logs"]]
-        print(self.current_task)
-        print(self.current_logs)
     def createtask(self,title)->dict:
         outmap:dict=dict()
         if(DB_insert_task(title)==True):
@@ -24,21 +22,31 @@ class cliservices:
         else:
             return {"Error":"already logging task.please end the task before new task checkout"}
         
-    def current_status(self):
-        return self.current_task
+    def current_status(self)->dict:
+        outmap:dict=dict()
+        outmap["task"]=""
+        outmap["logging"]="No"        
+        if(len(self.current_task)>0):
+            outmap["task"]=self.current_task[0].name
+            outmap["logging"]="Yes" if self.current_task[0].running==True else "No"
+        return outmap
 
-    def starttasklogging(self):
+    def starttasklogging(self)->dict:
+        outmap:dict=dict()
         if len(self.current_task)==0:
-            print("checkout task before start logging")
+            outmap["Error"]="Checkout task before start logging"
         elif self.current_task[0].running==1:
-            print("end logging before starting ")
+            outmap["Error"]="End current logging before starting again"
         else:
-            DB_insert_logs(self.current_task[0].id)
+            outmap["Error"]=DB_insert_logs(self.current_task[0].id)
+        return outmap
 
-    def endtasklogging(self):
+    def endtasklogging(self)->dict:
+        outmap:dict=dict()
         if len(self.current_task)==0:
-            print("checkout a task and start logging before ending")
+            outmap["Error"]="Checkout  task and start logging"
         elif self.current_task[0].running==0:
-            print("start logging a task before ending")
+            outmap["Error"]="Start logging  task before ending"
         else :
-            DB_update_logs(self.current_logs[0].id,self.current_task[0].id)
+            outmap["Error"]=DB_update_logs(self.current_logs[0].id,self.current_task[0].id)
+        return outmap
